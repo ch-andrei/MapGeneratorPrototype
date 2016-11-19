@@ -1,4 +1,6 @@
+import MapComponents.HexRegion;
 import MapComponents.Region;
+import MapComponents.ViewableRegion;
 import View.MapView;
 
 public class Driver {
@@ -16,7 +18,7 @@ public class Driver {
 				seed = (int)System.currentTimeMillis(),
 				height = 1000; // less than 100 doesn't work well
 		
-		Region region;
+		ViewableRegion region;
 		switch (choice)
 		{
 		case 0:
@@ -26,7 +28,9 @@ public class Driver {
 			region = generateOceanAndCentralizedIsland(n,seed,height);
 			break;
 		default:
-			region = new Region(10000, 1 , 1000, 0, 0, 4);
+			//int n, int seed, int elevation, double water, int rivers, int noise_function
+			//region = new Region(15, 1 , 1000, 0.5, 100, 0);
+            region = new HexRegion(10000, 1 , 1000, 0.5f, 100, 0);
 			break;
 		}
 		
@@ -35,10 +39,8 @@ public class Driver {
 		MapView view = new MapView(region, "World");
 		time3 = System.currentTimeMillis();
 
-		Thread thread1 = new Thread(region);
-		thread1.start();
-		Thread thread2 = new Thread(view);
-		thread2.start();
+		Thread threadView = new Thread(view);
+        threadView.start();
 
 		System.out.println("from driver: region " + (time2-time1) + " ;view  " + (time3 - time2)); 
 	}

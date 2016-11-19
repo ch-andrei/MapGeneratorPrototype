@@ -15,7 +15,7 @@ import com.sun.org.apache.regexp.internal.RE;
  * @author Andrei C
  *
  */
-public class Region implements Runnable{
+public class Region implements Runnable, ViewableRegion{
 	private final int REGION_SIZE = 1000000000, MIN_VORONOI_DISTANCE = 1;
 
 	private int maxElevation, minElevation, averageElevation, waterLevel;
@@ -245,8 +245,6 @@ public class Region implements Runnable{
 
 	public void generateHeightMap(int preferedAverageElevation, int noise_function)
 	{
-		// TODO 
-		// NOISEMAP INSTEAD OF NOISE
 		NoiseMap noiseMap = new NoiseMap(this.seed, noise_function);
 		int noiseIndex = noiseMap.getNoiseRes()-1; // must be getNoiseRes-1 due to array out of bounds handling
 		float[][] elevations = noiseMap.getElevations(); // (n,k) -> k levels of n octave perlin noise
@@ -526,36 +524,50 @@ public class Region implements Runnable{
 		return voronoiNodes;
 	}
 
-	public long getSeed() {
+    public void printHeightMap(){
+        for (Node node : this.voronoiNodes){
+            System.out.println("x" + node.getX() + "y" + node.getY() + "z" + node.getZ());
+        }
+    }
+
+    public Object getLock(){
+        return this.lock;
+    }
+
+    @Override
+	public List<Node> getViewableNodes(){
+		List<Node> list = new ArrayList<>();
+		list.addAll(getNodes());
+		list.addAll(getVoronoiNodes());
+		return list;
+	}
+
+    @Override
+	public long getViewableSeed() {
 		return this.seed;
 	}
 
-	public int getSize(){
-		return this.REGION_SIZE;
+    @Override
+	public int getViewableSize(){
+        return getRegionSize();
 	}
 
-	public void printHeightMap(){
-		for (Node node : this.voronoiNodes){
-			System.out.println("x" + node.getX() + "y" + node.getY() + "z" + node.getZ());
-		}
-	}
-
-	public Object getLock(){
-		return this.lock;
-	}
-
+    @Override
 	public int getMinimumElevation(){
 		return this.minElevation;
 	}
 
+    @Override
 	public int getMaximumElevation(){
 		return this.maxElevation;
 	}
 
+    @Override
 	public int getAverageElevation(){
 		return this.averageElevation;
 	}
 
+    @Override
 	public int getWaterLevel() {
 		return waterLevel;
 	}

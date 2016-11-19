@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 
 import MapComponents.Node;
 import MapComponents.Region;
+import MapComponents.ViewableRegion;
 
 /**
  * 
@@ -23,7 +24,7 @@ import MapComponents.Region;
  *	original author: Jonathan Trembley, University of McGill, COMP 202
  */
 public class MapView extends JFrame implements Runnable{
-	public Region region;
+	public ViewableRegion region;
 	public List<Node> nodes;
 	public ArrayList<Color> nodeColors;
 
@@ -32,7 +33,7 @@ public class MapView extends JFrame implements Runnable{
 
 	public	int pointSize = 10;
 
-	public MapView(Region region, String name){
+	public MapView(ViewableRegion region, String name){
 		super("The Map of the Amazing " + name);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		Map map = new Map();
@@ -41,9 +42,9 @@ public class MapView extends JFrame implements Runnable{
 		setVisible(true);
 
 		this.region = region;
-		this.nodes = region.getVoronoiNodes();
+		this.nodes = region.getViewableNodes();
 
-		this.MAX_X = this.MAX_Y = region.getRegionSize();
+		this.MAX_X = this.MAX_Y = region.getViewableSize();
 
 	}
 
@@ -52,26 +53,53 @@ public class MapView extends JFrame implements Runnable{
 	{
 		while (true) 
 		{
+            final int levels = 10;
 			this.nodes = new ArrayList<>();
-			this.nodes.addAll(region.getNodes());
-			//this.nodes.addAll(region.getVoronoiNodes());
+			this.nodes.addAll(region.getViewableNodes());
 			nodeColors = new ArrayList<Color>();  
-			int colorScheme = 1;
+			int colorScheme = 0;
 			int maxHeight = region.computeMaximumElevation();
+            int interval = maxHeight / levels;
 
+            long t1 = System.currentTimeMillis();
 			switch (colorScheme)
 			{
-			case 0: // blue elevation map
+			case 0: // elevation map only
 				for (int i = 0; i < this.nodes.size(); i++)
 				{
 					Node node = nodes.get(i);
-					double color = (1.0*node.getZ()/maxHeight);
-					Color c = new Color((int)(255-55-200*color%200), (int)(255 - 35 - 220*color%220), 250,250);
+                    int elevation_level = (int)node.getZ()/interval;
+					//double color = (1.0*node.getZ()/maxHeight);
+					//Color c = new Color((int)(255-55-200*color%200), (int)(255 - 35 - 220*color%220), 250,250);
+                    Color c;
+                    if (elevation_level == 0)
+                        c = new Color(0x59FF00);
+                    else if (elevation_level == 1)
+                        c = new Color(0xB3FF00);
+                    else if (elevation_level == 2)
+                        c = new Color(0xDCFF00);
+                    else if (elevation_level == 3)
+                        c = new Color(0xFFE100);
+                    else if (elevation_level == 4)
+                        c = new Color(0xFFA400);
+                    else if (elevation_level == 5)
+                        c = new Color(0xFF6E00);
+                    else if (elevation_level == 6)
+                        c = new Color(0xFF4F00);
+                    else if (elevation_level == 7)
+                        c = new Color(0xFF2600);
+                    else if (elevation_level == 8)
+                        c = new Color(0xFF000B);
+                    else if (elevation_level == 9)
+                        c = new Color(0xFF0053);
+                    else if (elevation_level == 10)
+                        c = new Color(0xFF0092);
+                    else
+                        c = new Color(0x000000);
 					nodeColors.add(i,c);
 				}
 				break;
-
-			case 1: 
+			case 1: // normal display
 				for (int i = 0; i < this.nodes.size(); i++)
 				{	
 					Node node = nodes.get(i);	
@@ -85,7 +113,6 @@ public class MapView extends JFrame implements Runnable{
 						c = c.darker();
 						nodeColors.add(i,c);
 						}
-					
 					else
 					{ 
 						// water
@@ -100,10 +127,13 @@ public class MapView extends JFrame implements Runnable{
 			default:
 				break;
 			}
+            long t2 = System.currentTimeMillis();
 			this.repaint();
+            long t3 = System.currentTimeMillis();
+            System.out.println((t2-t1) + " for computing colors; " + (t3-t2) + " for repainting");
 			try
 			{
-				Thread.sleep(2000);
+				Thread.sleep(500);
 			} catch (InterruptedException e)
 			{
 				// TODO Auto-generated catch block
