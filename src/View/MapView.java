@@ -52,7 +52,9 @@ public class MapView extends JFrame implements Runnable{
 	{
 		while (true) 
 		{
-			this.nodes = region.getVoronoiNodes();
+			this.nodes = new ArrayList<>();
+			this.nodes.addAll(region.getNodes());
+			//this.nodes.addAll(region.getVoronoiNodes());
 			nodeColors = new ArrayList<Color>();  
 			int colorScheme = 1;
 			int maxHeight = region.computeMaximumElevation();
@@ -101,7 +103,7 @@ public class MapView extends JFrame implements Runnable{
 			this.repaint();
 			try
 			{
-				Thread.sleep(1000);
+				Thread.sleep(2000);
 			} catch (InterruptedException e)
 			{
 				// TODO Auto-generated catch block
@@ -174,15 +176,15 @@ public class MapView extends JFrame implements Runnable{
 				int posY = h - PAD - (int)(node.getY()*scale_y);
 
 				// draw links to neighbors
-//				Color c = new Color(30, 30, 30, 60);
-//				g2.setColor(c);
-//				for(Node voisin: node.getConnectedTo()){
-//					if(voisin!=null){
-//						int vPosX = PAD + (int)((voisin.getX())*scale_x);
-//						int vPosY = h - PAD - (int)(voisin.getY()*scale_y);
-//						g2.drawLine(posX, posY, vPosX, vPosY);
-//					}
-//				}
+				//Color c = new Color(30, 30, 30, 60);
+				//g2.setColor(c);
+				//for(Node voisin: node.getConnectedTo()){
+				//	if(voisin!=null){
+				//		int vPosX = PAD + (int)((voisin.getX())*scale_x);
+				//		int vPosY = h - PAD - (int)(voisin.getY()*scale_y);
+				//		g2.drawLine(posX, posY, vPosX, vPosY);
+				//	}
+				//}
 
 				// draw city
 				if (nodeColors.size()==nodes.size()){

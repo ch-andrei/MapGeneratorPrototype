@@ -6,6 +6,7 @@ import java.util.Queue;
 import java.util.Random;
 
 import NoiseGeneration.Noise;
+import NoiseGeneration.NoiseMap;
 import VoronoiGenerator.VoronoiAdapter;
 import com.sun.org.apache.regexp.internal.RE;
 
@@ -101,9 +102,9 @@ public class Region implements Runnable{
 	public void generateRegion(int n, int seed, int elevation, double water, int rivers)
 	{
 		long t1 = System.currentTimeMillis();
-        //generateRadialHexGridNodes(n);
-        generateNodes(n);
-        generateFakeHexGridNodes(n);
+        generateRadialHexGridNodes(n);
+        //generateNodes(n);
+        //generateFakeHexGridNodes(n);
         //generateSquareGridNodes(n);
 
 		long t2 = System.currentTimeMillis();
@@ -114,7 +115,7 @@ public class Region implements Runnable{
 		long t4 = System.currentTimeMillis();
 		NodeUtilities.mergeAndRemoveDuplicateNodes(this.voronoiNodes);
 		long t5 = System.currentTimeMillis();
-		generateHeightMap(elevation);
+		generateHeightMap(elevation, this.noise_function);
 		long t6 = System.currentTimeMillis();
 		computeElevationParameters();
 		long t7 = System.currentTimeMillis();
@@ -242,26 +243,27 @@ public class Region implements Runnable{
 		voronoi.generateVoronoiNodesToArray(this, REGION_SIZE, voronoiNodes);
 	}
 
-	public void generateHeightMap(int preferedAverageElevation)
+	public void generateHeightMap(int preferedAverageElevation, int noise_function)
 	{
 		// TODO 
 		// NOISEMAP INSTEAD OF NOISE
-		Noise noise = new Noise(this.seed);
-		int noiseIndex = noise.getNoiseRes()-1; // must be getNoiseRes-1 due to array out of bounds handling
-		float[][] elevations = noise.generateMultipleLevelPerlinNoise(8,5); // (n,k) -> k levels of n octave perlin noise
+		NoiseMap noiseMap = new NoiseMap(this.seed, noise_function);
+		int noiseIndex = noiseMap.getNoiseRes()-1; // must be getNoiseRes-1 due to array out of bounds handling
+		float[][] elevations = noiseMap.getElevations(); // (n,k) -> k levels of n octave perlin noise
+
 		for (Node node : this.voronoiNodes)
 		{
 			int x = (int)((double)noiseIndex/this.REGION_SIZE * node.getX());
 			int y = (int)((double)noiseIndex/this.REGION_SIZE * node.getY());
-			node.setElevation(preferedAverageElevation * elevations[x][y]);
+			node.setElevation(preferedAverageElevation * (elevations[x][y]));
 		}
 
-		// for (Node node : this.nodes)
-		// {
-		// 	int x = (int)((double)noiseIndex/this.REGION_SIZE * node.getX());
-		// 	int y = (int)((double)noiseIndex/this.REGION_SIZE * node.getY());
-		// 	node.setElevation(preferedAverageElevation * elevations[x][y]);
-		// }
+		for (Node node : this.nodes)
+		{
+			int x = (int)((double)noiseIndex/this.REGION_SIZE * node.getX());
+			int y = (int)((double)noiseIndex/this.REGION_SIZE * node.getY());
+			node.setElevation(preferedAverageElevation * (elevations[x][y]));
+		}
 	}
 
 	public void generateWater(double waterLevelUnitFactor)
@@ -277,10 +279,16 @@ public class Region implements Runnable{
 				node.setWater(true);
 			}
 		}
+		for (Node node : this.nodes)
+		{
+			if (node.getZ() < waterLevel){
+				node.setWater(true);
+			}
+		}
 	}
 
 	/**
-	 * creates randomly distributed lakes
+	 * creates randomly distributed lakesgubskjb
 	 * @param numberOfLakes
 	 */
 	public void generateWaterSourcesAndLakes(int numberOfLakes)
@@ -289,9 +297,9 @@ public class Region implements Runnable{
 		for (int i = 0 ; i < numberOfLakes && fails < numberOfLakes; i++)
 		{
 			// get random source coordinates
-			int x,y;
-			x = random.nextInt(this.REGION_SIZE);
-			y = random.nextInt(this.REGION_SIZE);
+			int x = this.REGION_SIZE / 2, y = this.REGION_SIZE / 2 ;
+			x += -this.REGION_SIZE/2 + random.nextInt(this.REGION_SIZE/2);
+			y += -this.REGION_SIZE/2 + random.nextInt(this.REGION_SIZE/2);
 			// get source index
 			int node_index = NodeUtilities.binarySearch(this.voronoiNodes, new Node(x,y));
 			if (node_index < 0 || node_index >= voronoiNodes.size())
@@ -462,8 +470,11 @@ public class Region implements Runnable{
 			for (Node node : this.voronoiNodes){
 				sum += node.getZ();
 			}
+            for (Node node : this.nodes){
+                sum += node.getZ();
+            }
 		}
-		int out = (int) (sum / this.voronoiNodes.size());
+		int out = (int) (sum / (this.voronoiNodes.size() + this.nodes.size() ));
 		return out;
 	}
 

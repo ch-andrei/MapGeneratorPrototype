@@ -12,7 +12,7 @@ import MapComponents.NodeUtilities;
  */
 public class Noise {
 
-	private final int NOISE_RESOLUTION = 500;
+	private int noise_resolution = 500;
 	private int seed;
 
 	public Noise(int seed)
@@ -20,24 +20,29 @@ public class Noise {
 		this.seed = seed;
 	}
 
+	public Noise(int seed, int noise_resolution)
+	{
+		this(seed);
+		this.noise_resolution = noise_resolution;
+	}
+
 	public float[][] generatePerlinNoise(int octaveCount)
 	{
-		float[][] baseNoise = generateWhiteNoise(NOISE_RESOLUTION, this.seed);
+		float[][] baseNoise = generateWhiteNoise(noise_resolution, this.seed);
 		return generatePerlinNoise(baseNoise, octaveCount);
 	}
 
 	public float[][] generateMultipleLevelPerlinNoise(int octaveCount, int levels)
 	{
-		float[][] perlinNoiseCombined = new float[NOISE_RESOLUTION][NOISE_RESOLUTION];
+		float[][] perlinNoiseCombined = new float[noise_resolution][noise_resolution];
 		// generate 0,1,...,levels of perlin noise patterns and merge these
 		for (int i = 1; i <= levels; i++)
 		{
-			float[][] baseNoise = generateWhiteNoise(NOISE_RESOLUTION, this.seed + i - 1);
+			float[][] baseNoise = generateWhiteNoise(noise_resolution, this.seed + i - 1);
 			float[][] perlinNoise = generatePerlinNoise(baseNoise, octaveCount);
 			// merge results of new perlin level with previous perlinNoise
 			perlinNoiseCombined = NodeUtilities.mergeArrays(perlinNoise, perlinNoiseCombined,1,1);
 		}
-		perlinNoiseCombined = NodeUtilities.mergeArrays(generateNormalizedHalfSphere(this.NOISE_RESOLUTION, 2), perlinNoiseCombined,1,3);
 		return perlinNoiseCombined;
 	}
 
@@ -54,30 +59,6 @@ public class Noise {
 			}
 		}
 		return noise;
-	}
-	
-	// TODO
-	public float[][] generateNormalizedHalfSphere(int size, int intensity)
-	{
-		float[][] elevations = new float[size][size];
-		for (int i = 0; i < size; i++)
-		{
-			for (int j = 0; j < size; j++)
-			{
-				float val = (float)(Math.pow(size/2, 2) - Math.pow(i-size/2, 2) - Math.pow(j - size/2, 2));
-				val = (val > 0) ? val : 0;
-				elevations[i][j] = (float)Math.sqrt(val);
-			}
-		}
-		for (int i = 0; i < size; i++)
-		{
-			for (int j = 0; j < size; j++)
-			{
-				elevations[i][j] /= size*intensity;
-				if (elevations[i][j] > 1) System.out.println("wuuut");
-			}
-		}
-		return elevations;
 	}
 
 	public float[][] generateSmoothNoise(float[][] baseNoise, int octave)
@@ -168,6 +149,6 @@ public class Noise {
 
 	public int getNoiseRes()
 	{
-		return NOISE_RESOLUTION;
+		return noise_resolution;
 	}
 }

@@ -26,7 +26,7 @@ public class Driver {
 			region = generateOceanAndCentralizedIsland(n,seed,height);
 			break;
 		default:
-			region = new Region(20000, (int)System.currentTimeMillis() , 1000, 0.7, 10, 0);
+			region = new Region(10000, 1 , 1000, 0, 0, 4);
 			break;
 		}
 		
