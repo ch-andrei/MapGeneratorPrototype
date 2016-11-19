@@ -32,18 +32,18 @@ public class NoiseMap
             case 4:
                 elevations = applyNormalizedHalfSphere(elevations, elevations.length, 1f);
                 amplifyElevations(elevations, 3);
-                applyLogisticsFunctionToElevations(elevations);
+                //applyLogisticsFunctionToElevations(elevations);
                 break;
         }
-        normalize(elevations);
         normalizeToNElevationLevels(elevations, 25);
+        normalize(elevations);
         System.out.println("Noise Map generated.");
 	}
 
     public void normalizeToNElevationLevels(float[][] elevations, int levels){
         for (int i = 0; i < elevations.length; i++){
             for (int j = 0; j < elevations[i].length; j++){
-                elevations[i][j] = (int)(elevations[i][j] * levels) % levels;
+                elevations[i][j] = (elevations[i][j] * levels) % levels / levels;
             }
         }
     }
@@ -120,17 +120,18 @@ public class NoiseMap
 
     public void normalize(float[][] elevations){
         System.out.println("Normalizing!");
-        float sum = 0, max = 0;
-        for (int i = 1; i < elevations.length - 1; i++){
-            for (int j = 1; j < elevations[0].length - 1; j++){
-                sum += elevations[i][j];
+        float avg = 0, max = 0;
+        for (int i = 0; i < elevations.length; i++){
+            for (int j = 0; j < elevations[0].length; j++){
+                avg += elevations[i][j];
                 max = (elevations[i][j] > max) ? elevations[i][j] : max;
             }
         }
-        sum /= elevations.length * elevations.length;
+        System.out.println("Found max = " + max);
+        avg /= elevations.length * elevations.length;
         float adjustment = 1.0f / max;
-        for (int i = 1; i < elevations.length - 1; i++){
-            for (int j = 1; j < elevations[0].length - 1; j++){
+        for (int i = 0; i < elevations.length; i++){
+            for (int j = 0; j < elevations[i].length; j++){
                 elevations[i][j] = Math.abs(elevations[i][j] * adjustment);
             }
         }

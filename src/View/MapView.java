@@ -31,7 +31,7 @@ public class MapView extends JFrame implements Runnable{
 	public int PAD = 30;
 	public int MAX_X, MAX_Y;
 
-	public	int pointSize = 10;
+	public int pointSize = 5;
 
 	public MapView(ViewableRegion region, String name){
 		super("The Map of the Amazing " + name);
@@ -51,55 +51,63 @@ public class MapView extends JFrame implements Runnable{
 	@Override
 	public void run() 
 	{
+        int colorScheme = 0;
 		while (true) 
 		{
-            final int levels = 10;
 			this.nodes = new ArrayList<>();
 			this.nodes.addAll(region.getViewableNodes());
-			nodeColors = new ArrayList<Color>();  
-			int colorScheme = 0;
-			int maxHeight = region.computeMaximumElevation();
-            int interval = maxHeight / levels;
-
+			nodeColors = new ArrayList<Color>();
+            int water_level = region.getWaterLevel();
             long t1 = System.currentTimeMillis();
 			switch (colorScheme)
 			{
-			case 0: // elevation map only
+			case 0: // elevation map
 				for (int i = 0; i < this.nodes.size(); i++)
 				{
 					Node node = nodes.get(i);
-                    int elevation_level = (int)node.getZ()/interval;
-					//double color = (1.0*node.getZ()/maxHeight);
-					//Color c = new Color((int)(255-55-200*color%200), (int)(255 - 35 - 220*color%220), 250,250);
+                    int elevation = (int)node.getZ() - water_level;
                     Color c;
-                    if (elevation_level == 0)
+                    if (elevation < 0){
+                        if (elevation > -50){
+                            c = new Color(0x95E9FF);
+                        } else if (elevation > -100) {
+                            c = new Color(0x58C1FF);
+                        } else if (elevation > -250){
+                            c = new Color(0x067DED);
+                        } else if (elevation > -500){
+                            c = new Color(0x005F95);
+                        } else
+                            c = new Color(0x004176);
+                    }
+                    else if (elevation < 50)
+                        c = new Color(0x00C103);
+                    else if (elevation < 100)
                         c = new Color(0x59FF00);
-                    else if (elevation_level == 1)
-                        c = new Color(0xB3FF00);
-                    else if (elevation_level == 2)
-                        c = new Color(0xDCFF00);
-                    else if (elevation_level == 3)
-                        c = new Color(0xFFE100);
-                    else if (elevation_level == 4)
-                        c = new Color(0xFFA400);
-                    else if (elevation_level == 5)
-                        c = new Color(0xFF6E00);
-                    else if (elevation_level == 6)
-                        c = new Color(0xFF4F00);
-                    else if (elevation_level == 7)
-                        c = new Color(0xFF2600);
-                    else if (elevation_level == 8)
-                        c = new Color(0xFF000B);
-                    else if (elevation_level == 9)
-                        c = new Color(0xFF0053);
-                    else if (elevation_level == 10)
-                        c = new Color(0xFF0092);
+                    else if (elevation < 150)
+                        c = new Color(0xF2FF00);
+                    else if (elevation < 200)
+                        c = new Color(0xFFBE00);
+                    else if (elevation < 250)
+                        c = new Color(0xFF6D00);
+                    else if (elevation < 500)
+                        c = new Color(0xC04400);
+                    else if (elevation < 750)
+                        c = new Color(0xA31C00);
+                    else if (elevation < 1000)
+                        c = new Color(0xC24340);
+                    else if (elevation < 1500)
+                        c = new Color(0xB9818A);
+                    else if (elevation < 2000)
+                        c = new Color(0x988E8B);
+                    else if (elevation < 10000)
+                        c = new Color(0xAEB5BD);
                     else
-                        c = new Color(0x000000);
+                        c = new Color(0);
+
 					nodeColors.add(i,c);
 				}
 				break;
-			case 1: // normal display
+			case 1: // terrain features display
 				for (int i = 0; i < this.nodes.size(); i++)
 				{	
 					Node node = nodes.get(i);	
@@ -130,7 +138,7 @@ public class MapView extends JFrame implements Runnable{
             long t2 = System.currentTimeMillis();
 			this.repaint();
             long t3 = System.currentTimeMillis();
-            System.out.println((t2-t1) + " for computing colors; " + (t3-t2) + " for repainting");
+            //System.out.println((t2-t1) + " for computing colors; " + (t3-t2) + " for repainting");
 			try
 			{
 				Thread.sleep(500);

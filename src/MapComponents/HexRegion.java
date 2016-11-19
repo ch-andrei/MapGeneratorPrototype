@@ -28,7 +28,7 @@ public class HexRegion implements ViewableRegion{
         this.n = n;
         this.seed = seed;
         this.noise_function = noise_function;
-        generateRegion(2*elevation, water, rivers);
+        generateRegion(elevation, water, rivers);
         System.out.println("Hex region nodes " + nodes.length*nodes.length + " generated.");
     }
 
@@ -37,6 +37,7 @@ public class HexRegion implements ViewableRegion{
         generateHeightMap(elevation, this.noise_function);
         computeElevationParameters();
         generateWater(water);
+        System.out.println("Elevations: min = " + this.minElevation + "; max = " + this.maxElevation + "; avg = " + this.averageElevation);
         //generateWaterSourcesAndLakes(lakes);
     }
 
