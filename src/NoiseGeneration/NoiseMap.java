@@ -30,20 +30,39 @@ public class NoiseMap
                 smoothenConvolutionFilter(elevations, 0.05f);
                 break;
             case 4:
-                elevations = applyNormalizedHalfSphere(elevations, elevations.length, 1f);
-                amplifyElevations(elevations, 3);
+                elevations = applyNormalizedHalfSphere(elevations, elevations.length, 2f);
+                amplifyElevations(elevations, 1f);
                 //applyLogisticsFunctionToElevations(elevations);
                 break;
         }
-        normalizeToNElevationLevels(elevations, 25);
+        //normalizeToNElevationLevels(elevations, 25);
+        //smoothenConvolutionFilter(elevations, 0.15f);
         normalize(elevations);
+        //logarithmicClamp(elevations, 0.25f, 1);
         System.out.println("Noise Map generated.");
 	}
 
-    public void normalizeToNElevationLevels(float[][] elevations, int levels){
+    private void normalizeToNElevationLevels(float[][] elevations, int levels){
+        // TODO FIX THIS FUNCTION
         for (int i = 0; i < elevations.length; i++){
             for (int j = 0; j < elevations[i].length; j++){
                 elevations[i][j] = (elevations[i][j] * levels) % levels / levels;
+            }
+        }
+        normalize(elevations);
+    }
+
+    private float logarithmic(float value, float start, float intensity){
+        return (float)(start + Math.log(1 - start + value / intensity));
+    }
+
+    private void logarithmicClamp(float[][] elevations, float log_clamp_threshold, float intensity){
+        for (int i = 0; i < elevations.length; i++){
+            for (int j = 0; j < elevations[i].length; j++){
+                if (elevations[i][j] > log_clamp_threshold){
+                    //System.out.println("WAS " + elevations[i][j] + "; ADJUSTED " + logarithmic(elevations[i][j], log_clamp_threshold, intensity));
+                    elevations[i][j] = logarithmic(elevations[i][j], log_clamp_threshold, intensity);
+                }
             }
         }
     }
@@ -84,7 +103,7 @@ public class NoiseMap
 	}
 
     // results in elevation = elevation ^ amplify_factor
-	public void amplifyElevations(float[][] elevations, int amplify_factor){
+	public void amplifyElevations(float[][] elevations, float amplify_factor){
         System.out.println("Amplifying!");
 		float sumBefore = 0, sumAfter = 0;
 		for (int i = 0; i < elevations.length; i++){

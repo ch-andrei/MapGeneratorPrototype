@@ -102,8 +102,8 @@ public class Region implements Runnable, ViewableRegion{
 	public void generateRegion(int n, int seed, int elevation, double water, int rivers)
 	{
 		long t1 = System.currentTimeMillis();
-        generateRadialHexGridNodes(n);
-        //generateNodes(n);
+        //generateRadialHexGridNodes(n);
+        generateNodes(n);
         //generateFakeHexGridNodes(n);
         //generateSquareGridNodes(n);
 

@@ -37,6 +37,7 @@ public class HexRegion implements ViewableRegion{
         generateHeightMap(elevation, this.noise_function);
         computeElevationParameters();
         generateWater(water);
+        generateWaterSourcesAndLakes(lakes);
         System.out.println("Elevations: min = " + this.minElevation + "; max = " + this.maxElevation + "; avg = " + this.averageElevation);
         //generateWaterSourcesAndLakes(lakes);
     }
@@ -84,16 +85,13 @@ public class HexRegion implements ViewableRegion{
         for (int i = 0 ; i < numberOfLakes && fails < numberOfLakes; i++)
         {
             // get random source coordinates
-            int x = this.hexSize / 2,
-                    y = this.hexSize / 2;
-
-            x += -this.hexSize/2 + random.nextInt(this.hexSize);
-            y += -this.hexSize/2 + random.nextInt(this.hexSize);
+            int x,y;
+            x = random.nextInt(this.hexSize);
+            y = random.nextInt(this.hexSize);
 
             Node node = this.nodes[x][y];
 
-            if(node == null || node.getWater())
-            {
+            if(node == null || node.getWater()) {
                 i--;
                 fails++;
                 continue;
@@ -108,28 +106,22 @@ public class HexRegion implements ViewableRegion{
             do {
                 node = queueConnectedNodes.remove();
                 node.setWater(true);
-                while (node != null)
-                {
+                while (node != null) {
                     depth = 0;
                     deepest = null;
                     for (Node connectedNode : node.getConnectedTo())
                     {
                         int delta = (int)(node.getZ() - connectedNode.getZ());
-                        if ( !connectedNode.getWater() )
-                        {
-                            if ( delta > 0 && depth < delta)
-                            {
+                        if ( !connectedNode.getWater() ){
+                            if ( delta > 0 && depth < delta) {
                                 deepest = connectedNode;
                                 depth = delta;
-                            }
-                            else if (source_strength > 0)
-                            {
+                            } else if (source_strength > 0){
                                 queueConnectedNodes.add(connectedNode);
                             }
                         }
                     }
-                    if (deepest != null)
-                    {
+                    if (deepest != null){
                         deepest.setWater(true);
                         source_strength--;
                     }
@@ -176,13 +168,14 @@ public class HexRegion implements ViewableRegion{
                     continue;
                 }
                 int Z = -X - Y;
-                int x = centerX + X * 2 * hexSize;
-                int y = centerY + (Y-Z)* hexHeight;
+                int x = centerX + X * 2 * hexHeight;
+                int y = centerY + (Y-Z)* hexSize;
                 Node nodeToAdd = new Node(x,y);
                 nodes[i][j] = nodeToAdd;
                 counter++;
             }
         }
+        // connect nodes
         for (int i = 0; i < this.nodes.length; i++){
             for (int j = 0; j < this.nodes.length; j++){
                 for (int k = 0; k < 6; k++){

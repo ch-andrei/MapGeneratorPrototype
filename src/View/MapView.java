@@ -31,7 +31,7 @@ public class MapView extends JFrame implements Runnable{
 	public int PAD = 30;
 	public int MAX_X, MAX_Y;
 
-	public int pointSize = 5;
+	public int pointSize = 7;
 
 	public MapView(ViewableRegion region, String name){
 		super("The Map of the Amazing " + name);
@@ -45,13 +45,12 @@ public class MapView extends JFrame implements Runnable{
 		this.nodes = region.getViewableNodes();
 
 		this.MAX_X = this.MAX_Y = region.getViewableSize();
-
 	}
 
 	@Override
 	public void run() 
 	{
-        int colorScheme = 0;
+        int colorScheme = 1;
 		while (true) 
 		{
 			this.nodes = new ArrayList<>();
@@ -67,11 +66,11 @@ public class MapView extends JFrame implements Runnable{
 					Node node = nodes.get(i);
                     int elevation = (int)node.getZ() - water_level;
                     Color c;
-                    if (elevation < 0){
+                    if (node.getWater()){
                         if (elevation > -50){
-                            c = new Color(0x95E9FF);
+                            c = new Color(0xC2D2E7);
                         } else if (elevation > -100) {
-                            c = new Color(0x58C1FF);
+                            c = new Color(0x54B3F0);
                         } else if (elevation > -250){
                             c = new Color(0x067DED);
                         } else if (elevation > -500){
@@ -79,6 +78,8 @@ public class MapView extends JFrame implements Runnable{
                         } else
                             c = new Color(0x004176);
                     }
+                    else if (elevation < 0)
+                        c = new Color(0x696300);
                     else if (elevation < 50)
                         c = new Color(0x00C103);
                     else if (elevation < 100)
@@ -88,11 +89,15 @@ public class MapView extends JFrame implements Runnable{
                     else if (elevation < 200)
                         c = new Color(0xFFBE00);
                     else if (elevation < 250)
-                        c = new Color(0xFF6D00);
+                        c = new Color(0xFF8C00);
+					else if (elevation < 300)
+						c = new Color(0xFF6900);
+                    else if (elevation < 400)
+                        c = new Color(0xE74900);
                     else if (elevation < 500)
-                        c = new Color(0xC04400);
+                        c = new Color(0xE10C00);
                     else if (elevation < 750)
-                        c = new Color(0xA31C00);
+                        c = new Color(0x971C00);
                     else if (elevation < 1000)
                         c = new Color(0xC24340);
                     else if (elevation < 1500)
@@ -214,15 +219,15 @@ public class MapView extends JFrame implements Runnable{
 				int posY = h - PAD - (int)(node.getY()*scale_y);
 
 				// draw links to neighbors
-				//Color c = new Color(30, 30, 30, 60);
-				//g2.setColor(c);
-				//for(Node voisin: node.getConnectedTo()){
-				//	if(voisin!=null){
-				//		int vPosX = PAD + (int)((voisin.getX())*scale_x);
-				//		int vPosY = h - PAD - (int)(voisin.getY()*scale_y);
-				//		g2.drawLine(posX, posY, vPosX, vPosY);
-				//	}
-				//}
+				Color c = new Color(30, 30, 30, 60);
+				g2.setColor(c);
+				for(Node voisin: node.getConnectedTo()){
+					if(voisin!=null){
+						int vPosX = PAD + (int)((voisin.getX())*scale_x);
+						int vPosY = h - PAD - (int)(voisin.getY()*scale_y);
+						g2.drawLine(posX, posY, vPosX, vPosY);
+					}
+				}
 
 				// draw city
 				if (nodeColors.size()==nodes.size()){

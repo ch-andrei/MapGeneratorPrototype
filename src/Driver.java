@@ -30,7 +30,7 @@ public class Driver {
 		default:
 			//int n, int seed, int elevation, double water, int rivers, int noise_function
 			//region = new Region(15, 1 , 1000, 0.5, 100, 0);
-            region = new HexRegion(50000, 1 , 2000, 0.5f, 100, 0);
+            region = new Region(200, (int)System.currentTimeMillis(), 1000, 0f, 0, 0);
 			break;
 		}
 		
